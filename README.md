@@ -1,4 +1,4 @@
-# Streamlit Food & Oil Apps
+# Streamlit: Work in Progress
 
 This repository contains two Streamlit applications:
 
@@ -24,24 +24,6 @@ requirements.txt
 ```
 
 ## Getting Started
-
-### Prerequisites
-
-- Python 3.8+
-- See [requirements.txt](requirements.txt) for dependencies.
-
-### Installation
-
-1. Clone the repository:
-    ```sh
-    git clone <repo-url>
-    cd streamlit
-    ```
-
-2. Install dependencies:
-    ```sh
-    pip install -r requirements.txt
-    ```
 
 ### Running the Apps
 
