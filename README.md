@@ -1,4 +1,4 @@
-# Streamlit Food & Oil Apps
+# Streamlit: Work in Progress
 
 This repository contains two Streamlit applications:
 
