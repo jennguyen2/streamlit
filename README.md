@@ -1,9 +1,10 @@
 # Streamlit: Work in Progress
 
-This repository contains two Streamlit applications:
+This repository contains several Streamlit applications:
 
 - **Food App**: Helps you browse recipes, create shopping lists, and manage a recipe backlog.
-- **Oil App**: Allows you to upload CSV datasets and view summary statistics using pandas.
+- **Oil App**: Projects Oil prices and notifies when best to buy
+- **Profiler App**: 
 
 ## Project Structure
 
@@ -18,8 +19,11 @@ food/
         4_Backlog.py
 oil/
     oil_app.py
-profiling/
-    home.py
+profiler/
+    profiler.py
+    pages/
+        oneways.py
+        oneways_static.py
 requirements.txt
 ```
 
@@ -39,13 +43,13 @@ streamlit run food/Home.py
 streamlit run oil/oil_app.py
 ```
 
-#### Pandas Profiling App
+#### Profiler App
 
 ```sh
-streamlit run home.py
+streamlit run profiler/profiler.py
 ```
 
-## Features
+## Apps
 
 ### Food App
 
@@ -56,14 +60,10 @@ streamlit run home.py
 
 ### Oil App
 
-- Uses Prophet to project oil prices
+- Uses Prophet to project oil prices.
 - Backlog: identifies a good time to buy and sends an email to notify.
 
-## Notes
+### Profiler App
 
-- The Food App loads a dataset from HuggingFace (`hf://datasets/Hieu-Pham/kaggle_food_recipes/...`). Ensure you have access and the required packages (`fsspec`, `s3fs`, `huggingface_hub`) installed if needed.
-- For additional dependencies, see [oil/requirements.txt](oil/requirements.txt).
-
----
-
-Feel free to contribute or open issues!
+- Upload CSV or Parquet files, or use a default dataset.
+- Filter data by columns and values.
