@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.express as px
 
 st.title("Oneways")
 
@@ -40,11 +41,17 @@ if df is not None:
     feature_col1 = st.sidebar.selectbox("Select first feature variable", feature_cols, key="feature1")
     feature_col2 = st.sidebar.selectbox("Select second feature variable", [col for col in feature_cols if col != feature_col1], key="feature2")
 
+    # Facet variable selection
+    facet_col = st.sidebar.selectbox(
+        "Facet by (optional)", 
+        ["None"] + feature_cols, 
+        index=0
+    )
+
     col1, col2 = st.columns(2)
     overall_target_mean = df[target_col].mean()
 
     def plot_oneway(feature_col, grouped, overall_target_mean, color, target_color):
-        # Convert categorical variables to string for plotting
         x_vals = grouped[feature_col].astype(str) if not pd.api.types.is_numeric_dtype(grouped[feature_col]) else grouped[feature_col]
         fig = go.Figure()
         fig.add_bar(
@@ -52,7 +59,8 @@ if df is not None:
             y=grouped['count'],
             name='Count',
             marker_color=color,
-            yaxis='y1'
+            yaxis='y1',
+            showlegend=False
         )
         fig.add_trace(
             go.Scatter(
@@ -61,7 +69,8 @@ if df is not None:
                 name=f"{target_col} Rate",
                 mode='markers',
                 marker_color=target_color,
-                yaxis='y2'
+                yaxis='y2',
+                showlegend=False
             )
         )
         fig.add_trace(
@@ -70,9 +79,9 @@ if df is not None:
                 y=[overall_target_mean] * len(grouped),
                 name='Overall Mean Rate',
                 mode='lines',
-                line=dict(color='gray', dash='dot'),
+                line=dict(color=target_color, dash='dash'),
                 yaxis='y2',
-                showlegend=True
+                showlegend=False
             )
         )
         fig.update_layout(
@@ -82,14 +91,14 @@ if df is not None:
                 side='left'
             ),
             yaxis2=dict(
-                title=f"{target_col} Rate",
+                title=f"{target_col} rate",
                 overlaying='y',
                 side='right',
                 tickformat=".2%",
                 range=[0, 1]
             ),
-            legend=dict(x=0.01, y=0.99),
-            title=f"{feature_col} by {target_col} Rate"
+            showlegend=False,
+            title=f"{feature_col} by {target_col} rate"
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -104,6 +113,32 @@ if df is not None:
         grouped2 = df.groupby(feature_col2, dropna=False)[target_col].agg(['count', 'mean']).reset_index()
         grouped2 = grouped2.sort_values('count', ascending=False)
         plot_oneway(feature_col2, grouped2, overall_target_mean, 'lightgreen', 'darkorange')
+
+    # --- Facet Plot ---
+    if facet_col != "None":
+        st.header(f"Facet Oneway: {feature_col1} by {target_col} rate, faceted by {facet_col}")
+
+        facet_df = df.copy()
+        facet_df[feature_col1] = facet_df[feature_col1].astype(str)
+        facet_df[facet_col] = facet_df[facet_col].astype(str)
+        facet_values = facet_df[facet_col].unique()
+
+        n_cols = 3
+        n_rows = (len(facet_values) + n_cols - 1) // n_cols
+        facet_grid = st.container()
+        for row in range(n_rows):
+            cols = facet_grid.columns(n_cols)
+            for col_idx in range(n_cols):
+                idx = row * n_cols + col_idx
+                if idx >= len(facet_values):
+                    break
+                facet_value = facet_values[idx]
+                sub_df = facet_df[facet_df[facet_col] == facet_value]
+                grouped = sub_df.groupby(feature_col1, dropna=False)[target_col].agg(['count', 'mean']).reset_index()
+                grouped = grouped.sort_values('count', ascending=False)
+                with cols[col_idx]:
+                    st.markdown(f"**{facet_col} = {facet_value}**")
+                    plot_oneway(feature_col1, grouped, overall_target_mean, 'lightblue', 'crimson')
 
 else:
     st.info("Please upload a CSV or Parquet file, enter an S3 link, or select the default dataset.")
