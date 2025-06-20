@@ -12,15 +12,26 @@ if use_default:
     default_df = pd.read_csv("/Users/jennguyen/Data/dermatology.csv")
 uploaded_file = st.sidebar.file_uploader("Upload your dataset", type=["csv", "parquet"])
 
+# S3 bucket link input
+s3_link = st.sidebar.text_input("Or enter S3 bucket link (s3://...)", "")
+
+df = None
 if uploaded_file is not None:
     if uploaded_file.name.endswith(".csv"):
         df = pd.read_csv(uploaded_file)
     else:
         df = pd.read_parquet(uploaded_file)
+elif s3_link.startswith("s3://"):
+    import s3fs
+    fs = s3fs.S3FileSystem()
+    if s3_link.endswith(".csv"):
+        with fs.open(s3_link, 'rb') as f:
+            df = pd.read_csv(f)
+    elif s3_link.endswith(".parquet"):
+        with fs.open(s3_link, 'rb') as f:
+            df = pd.read_parquet(f)
 elif use_default and default_df is not None:
     df = default_df
-else:
-    df = None
 
 if df is not None:
     st.sidebar.header("Oneway Analysis")
@@ -95,4 +106,4 @@ if df is not None:
         plot_oneway(feature_col2, grouped2, overall_target_mean, 'lightgreen', 'darkorange')
 
 else:
-    st.info("Please upload a CSV or Parquet file or select the default dataset.")
+    st.info("Please upload a CSV or Parquet file, enter an S3 link, or select the default dataset.")
